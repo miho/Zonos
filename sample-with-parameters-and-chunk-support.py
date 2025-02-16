@@ -60,7 +60,19 @@ text = (
     "With a deep-layer ridge to its north, the system turned to a steady west-northwest track. A reconnaissance aircraft flight late on September 7 reported"
     " a very elongated center, with peak flight winds of 55 mph (89 km/h) about 100 miles (160 km) northeast of the center. Subsequent to the flight, the center"
     " became slightly better organized, and based on the large wind field and the presence of an upper-level low to its west-southwest, "
-    "the National Hurricane Center classified the system as Subtropical Storm Gabrielle early on September 8 while located about 385 miles (620 km) southeast of Cape Lookout, North Carolina.[8]"
+    "the National Hurricane Center classified the system as Subtropical Storm Gabrielle early on September 8 while located about 385 miles (620 km) southeast of Cape Lookout, North Carolina.[8] "
+    "Upon becoming a subtropical cyclone, Gabrielle was located in an area of cooler air to its north, dry air to its south and west, southerly wind shear, and cooler water temperatures along its path.[8] "
+    "Despite these unfavorable conditions, a curved convective band developed in its northern and western quadrants,[9] and the circulation became better defined.[10] Subsequently, the rainbands in its "
+    "northeastern quadrant dissipated, leaving the well-defined center far removed from the convection. By later that day, the circulation began to become more involved with the remaining convection. "
+    "Based on evidence of a weak warm-core, the system was re-designated as Tropical Storm Gabrielle late on September 8 about 185 miles (298 km) southeast of Cape Lookout, North Carolina.[11] Vertical "
+    "wind shear decreased as the storm passed over the Gulf Stream, allowing a strong convective burst to develop near the center.[12] As it approached the coast of North Carolina, the center re-developed "
+    "within the deep convection underneath the mid-level circulation,[13] although increased northerly wind shear displaced the center of Gabrielle to the north of the thunderstorm activity.[14] Based on "
+    "reports from Hurricane Hunters, it is estimated Gabrielle moved ashore at Cape Lookout National Seashore at 1530 UTC on September 9 with winds of 60 mph (97 km/h), though due to the shear the strongest "
+    "winds remained offshore.[1] Tracking around the ridge over the western Atlantic, the storm turned to the north and north-northeast,[15] emerging into the ocean near Kill Devil Hills, North Carolina early "
+    "on September 10 as a poorly organized system with convection far to the south of the center.[16] Gabrielle weakened to a tropical depression shortly thereafter,[17] and maintained scattered convection despite "
+    "unfavorable wind shear as it tracked along the northern portion of the Gulf Stream.[18]"
+     " By midday on September 11, the circulation had become ill-defined and elongated; failing to meet the criteria of a tropical cyclone, the National Hurricane Center declared Gabrielle dissipating well to the south of Nova Scotia.[19]"
+    "By early the next day, the remnants of Gabrielle were absorbed by an approaching cold front.[20]"
 )
 
 # replace [1], [2], etc. with empty string
@@ -132,6 +144,7 @@ if prefix_audio_path:
 
 # Set a randomized seed for varied generation per chunk
 seed = random.randint(0, 2**32 - 1)
+# 3782800710 works well for the sample text
 print(f"Randomized seed for chunks {seed}")
 torch.manual_seed(seed)    
 
