@@ -12,3 +12,5 @@ wheels/
 # Misc.
 .ipynb_checkpoints/
 huggingface/
+
+chunk_out/
