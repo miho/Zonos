@@ -10,7 +10,6 @@ if (Test-Path $vswherePath) {
     }
 } else {
     Write-Host "ERROR: vswhere.exe not found! Please ensure Visual Studio is installed."
-    exit 1
 }
 
 # Ensure the path is valid
@@ -23,7 +22,6 @@ if (Test-Path $vcvarsPath) {
     }
 } else {
     Write-Host "ERROR: vcvars64.bat could not be found! Please make sure MSVC is installed properly."
-    exit 1
 }
 
 # Activate python venv
