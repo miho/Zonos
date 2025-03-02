@@ -14,3 +14,5 @@ wheels/
 huggingface/
 
 chunk_out/
+
+data/
