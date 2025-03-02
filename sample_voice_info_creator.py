@@ -1,0 +1,336 @@
+# sample_voice_info_creator.py
+import json
+import argparse
+from pathlib import Path
+
+def create_default_voice_info():
+    """Create a default voice info configuration."""
+    return {
+        "version": "1.0",
+        "voices": [
+            {
+                "id": "narrator",
+                "name": "Narrator",
+                "description": "A neutral, clear voice for narration",
+                "gender": "neutral",
+                "age_range": "30-40",
+                "default_parameters": {
+                    "pitch": 0,
+                    "speed": 1.0,
+                    "volume": 1.0,
+                    "clarity": 0.9,
+                    "speaking_rate": 15.0,
+                    "emotion_vector": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "tense": {
+                        "emotion_vector": [0.1, 0.2, 0.3, 0.1, 0.1, 0.1, 0.1, 0.0],
+                        "speaking_rate_adjustment": -1.0,
+                        "pitch_adjustment": 0.1
+                    },
+                    "suspense": {
+                        "emotion_vector": [0.15, 0.25, 0.3, 0.1, 0.1, 0.0, 0.1, 0.0],
+                        "speaking_rate_adjustment": -2.0
+                    },
+                    "observant": {
+                        "emotion_vector": [0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "curious": {
+                        "emotion_vector": [0.3, 0.1, 0.0, 0.2, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0.5
+                    },
+                    "final": {
+                        "emotion_vector": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.05, 0.05],
+                        "speaking_rate_adjustment": -1.0
+                    },
+                    "dramatic": {
+                        "emotion_vector": [0.1, 0.3, 0.2, 0.1, 0.1, 0.1, 0.05, 0.05],
+                        "speaking_rate_adjustment": -1.5
+                    },
+                    "twist": {
+                        "emotion_vector": [0.1, 0.3, 0.1, 0.2, 0.1, 0.1, 0.05, 0.05],
+                        "speaking_rate_adjustment": -0.5
+                    },
+                    "revelation": {
+                        "emotion_vector": [0.2, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": -0.5
+                    },
+                    "intrigued": {
+                        "emotion_vector": [0.25, 0.1, 0.05, 0.2, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "mysterious": {
+                        "emotion_vector": [0.15, 0.15, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": -1.0
+                    },
+                    "calm": {
+                        "emotion_vector": [0.4, 0.05, 0.05, 0.05, 0.15, 0.15, 0.05, 0.1],
+                        "speaking_rate_adjustment": -0.5
+                    }
+                }
+            },
+            {
+                "id": "protagonist",
+                "name": "Lisa",
+                "description": "The protagonist's voice - a professional woman in her 30s",
+                "gender": "female",
+                "age_range": "30-35",
+                "default_parameters": {
+                    "pitch": 0.1,
+                    "speed": 1.1,
+                    "volume": 1.0,
+                    "clarity": 0.9,
+                    "speaking_rate": 16.0,
+                    "emotion_vector": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "tired": {
+                        "emotion_vector": [0.1, 0.1, 0.05, 0.05, 0.3, 0.3, 0.05, 0.05],
+                        "speaking_rate_adjustment": -2.0
+                    },
+                    "concerned": {
+                        "emotion_vector": [0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": -0.5
+                    },
+                    "thoughtful": {
+                        "emotion_vector": [0.2, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": -1.0
+                    },
+                    "confused": {
+                        "emotion_vector": [0.1, 0.1, 0.1, 0.3, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "determined": {
+                        "emotion_vector": [0.2, 0.1, 0.1, 0.1, 0.05, 0.05, 0.2, 0.2],
+                        "speaking_rate_adjustment": 1.0
+                    },
+                    "alert": {
+                        "emotion_vector": [0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.2, 0.1],
+                        "speaking_rate_adjustment": 0.5
+                    }
+                }
+            },
+            {
+                "id": "barista",
+                "name": "Barista",
+                "description": "A coffee shop employee with a friendly demeanor",
+                "gender": "neutral",
+                "age_range": "20-30",
+                "default_parameters": {
+                    "pitch": 0.05,
+                    "speed": 1.0,
+                    "volume": 1.0,
+                    "clarity": 0.9,
+                    "speaking_rate": 15.5,
+                    "emotion_vector": [0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "friendly": {
+                        "emotion_vector": [0.4, 0.1, 0.05, 0.05, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0.5
+                    },
+                    "mysterious": {
+                        "emotion_vector": [0.15, 0.15, 0.2, 0.2, 0.1, 0.1, 0.05, 0.05],
+                        "speaking_rate_adjustment": -1.0
+                    }
+                }
+            },
+            {
+                "id": "bookstore-clerk",
+                "name": "Bookstore Clerk",
+                "description": "A helpful bookstore employee",
+                "gender": "neutral",
+                "age_range": "25-35",
+                "default_parameters": {
+                    "pitch": -0.05,
+                    "speed": 0.95,
+                    "volume": 1.0,
+                    "clarity": 0.9,
+                    "speaking_rate": 14.0,
+                    "emotion_vector": [0.35, 0.1, 0.05, 0.1, 0.1, 0.1, 0.1, 0.1]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.35, 0.1, 0.05, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "helpful": {
+                        "emotion_vector": [0.4, 0.05, 0.05, 0.05, 0.1, 0.1, 0.15, 0.1],
+                        "speaking_rate_adjustment": 0.5
+                    }
+                }
+            },
+            {
+                "id": "announcement",
+                "name": "Station Announcement",
+                "description": "A clear, authoritative voice for public announcements",
+                "gender": "neutral",
+                "age_range": "40-50",
+                "default_parameters": {
+                    "pitch": 0,
+                    "speed": 0.9,
+                    "volume": 1.1,
+                    "clarity": 1.0,
+                    "speaking_rate": 14.0,
+                    "emotion_vector": [0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.1]
+                },
+                "effects": {
+                    "reverb": 0.3,
+                    "filter_type": "announcement"
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.1],
+                        "speaking_rate_adjustment": 0
+                    }
+                }
+            },
+            {
+                "id": "note",
+                "name": "Written Note",
+                "description": "Voice representing written text",
+                "gender": "neutral",
+                "age_range": "30-40",
+                "default_parameters": {
+                    "pitch": 0,
+                    "speed": 0.9,
+                    "volume": 0.9,
+                    "clarity": 0.95,
+                    "speaking_rate": 13.0,
+                    "emotion_vector": [0.25, 0.1, 0.1, 0.15, 0.1, 0.1, 0.1, 0.1]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.25, 0.1, 0.1, 0.15, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "urgent": {
+                        "emotion_vector": [0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 1.0
+                    }
+                }
+            },
+            {
+                "id": "security",
+                "name": "Security System",
+                "description": "An electronic security system voice",
+                "gender": "neutral",
+                "age_range": "N/A",
+                "default_parameters": {
+                    "pitch": -0.1,
+                    "speed": 0.9,
+                    "volume": 1.0,
+                    "clarity": 1.0,
+                    "speaking_rate": 13.5,
+                    "emotion_vector": [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1, 0.1]
+                },
+                "effects": {
+                    "filter_type": "electronic",
+                    "filter_strength": 0.5
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "monotone": {
+                        "emotion_vector": [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1, 0.1],
+                        "speaking_rate_adjustment": -0.5
+                    }
+                }
+            },
+            {
+                "id": "weber",
+                "name": "Dr. Weber",
+                "description": "A mysterious scientist with authority",
+                "gender": "neutral",
+                "age_range": "45-55",
+                "default_parameters": {
+                    "pitch": -0.05,
+                    "speed": 0.95,
+                    "volume": 1.0,
+                    "clarity": 0.9,
+                    "speaking_rate": 14.0,
+                    "emotion_vector": [0.2, 0.15, 0.15, 0.1, 0.1, 0.1, 0.1, 0.1]
+                },
+                "emotional_profiles": {
+                    "neutral": {
+                        "emotion_vector": [0.2, 0.15, 0.15, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    },
+                    "stern": {
+                        "emotion_vector": [0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": -0.5
+                    },
+                    "proud": {
+                        "emotion_vector": [0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                        "speaking_rate_adjustment": 0
+                    }
+                }
+            }
+        ],
+        "voice_mapping": {
+            "global_defaults": {
+                "node": "narrator",
+                "choice": "narrator",
+                "event": "narrator"
+            },
+            "character_defaults": {
+                "narrator": "narrator",
+                "protagonist": "protagonist",
+                "barista": "barista",
+                "bookstore-clerk": "bookstore-clerk",
+                "announcement": "announcement",
+                "note": "note",
+                "security": "security",
+                "weber": "weber"
+            }
+        },
+        "tts_system_settings": {
+            "system_id": "zonos",
+            "api_version": "1.0",
+            "sampling_rate": 44100,
+            "audio_format": "wav",
+            "supported_emotions": [
+                "neutral", "tense", "suspense", "observant", "curious", "final",
+                "dramatic", "twist", "revelation", "intrigued", "mysterious", "calm",
+                "tired", "concerned", "thoughtful", "confused", "determined", "alert",
+                "friendly", "helpful", "urgent", "monotone", "stern", "proud"
+            ],
+            "max_text_length": 250,
+            "voice_cloning": {
+                "enabled": True,  # Changed from true to True
+                "min_sample_length_seconds": 5.0,
+                "recommended_sample_count": 1,
+                "max_cloning_jobs": 5
+            }
+        }
+    }
+
+def main():
+    parser = argparse.ArgumentParser(description="Create a default voice info file")
+    parser.add_argument("--output", type=str, default="voice_info.json", help="Output path for the voice info file")
+    args = parser.parse_args()
+
+    voice_info = create_default_voice_info()
+
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(voice_info, f, indent=2)
+
+    print(f"Created voice info file at {args.output}")
+
+if __name__ == "__main__":
+    main()
