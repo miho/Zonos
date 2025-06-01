@@ -55,7 +55,7 @@
     {
       "id": "barista",
       "name": "Barista",
-      "description": "A coffee shop employee with a friendly demeanor",
+      "description": "A young coffee shop employee with a friendly demeanor",
       "gender": "neutral",
       "age_range": "20-30",
       "zonos_parameters": {

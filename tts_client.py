@@ -221,7 +221,7 @@ class TTSClient:
 
     def _get_voice_for_entry(self, entry: Dict[str, Any], voice_mapping: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Get the appropriate voice for a dialogue entry (case-insensitive)."""
-        character = entry.get("character", "")
+        character = entry.get("voice", entry.get("character", ""))
         text_type = entry.get("textType", "")
 
         # Try to find a direct match for the character (case-insensitive)
