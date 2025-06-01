@@ -116,7 +116,8 @@ model = Zonos.from_pretrained("Zyphra/Zonos-v0.1-hybrid", device=device)
 
 # Load a reference audio to obtain the speaker embedding
 # wav, sampling_rate = torchaudio.load("assets/michael-01.wav")
-wav, sampling_rate = torchaudio.load("assets/hello-and-welcome-to-zonos-t-american-female-2025-02-16.wav")
+# wav, sampling_rate = torchaudio.load("assets/hello-and-welcome-to-zonos-t-american-female-2025-02-16.wav")
+wav, sampling_rate = torchaudio.load("assets/female-professional-sample.wav")
 speaker = model.make_speaker_embedding(wav, sampling_rate)
 
 # Set the TTS parameters

@@ -1,4 +1,3 @@
-# tts_client.py
 import json
 import os
 import sys
@@ -63,6 +62,10 @@ class TTSClient:
 
     def upload_voice_sample(self, voice_id: str, name: str, description: str, file_path: str) -> bool:
         """Upload a voice sample to the server."""
+        if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist")
+            return False
+
         with open(file_path, "rb") as f:
             files = {"sample_file": (os.path.basename(file_path), f)}
             data = {
@@ -73,23 +76,34 @@ class TTSClient:
                 })
             }
             response = self.session.post(f"{self.api_url}/voice-sample", files=files, data=data)
-            return response.status_code == 200
 
-    def generate_speech(self, text: str, voice_id: str = None, emotion: List[float] = None,
-                        language: str = "en-us", speaking_rate: float = 15.0,
-                        seed: Optional[int] = None) -> Dict[str, Any]:
+            if response.status_code == 200:
+                print(f"Successfully uploaded voice sample: {file_path}")
+                return True
+            else:
+                print(f"Error uploading voice sample: {response.status_code} - {response.text}")
+                return False
+
+    def generate_speech(self, text: str, voice_id: str = None, emotion_vector: List[float] = None,
+                        language: str = "en-us", speaking_rate: float = None,
+                        pitch: float = None, seed: Optional[int] = None) -> Dict[str, Any]:
         """Generate speech from text."""
         payload = {
             "text": text,
-            "language": language,
-            "speaking_rate": speaking_rate
+            "language": language
         }
 
         if voice_id:
             payload["voice_id"] = voice_id
 
-        if emotion:
-            payload["emotion"] = emotion
+        if emotion_vector:
+            payload["emotion_vector"] = emotion_vector
+
+        if speaking_rate:
+            payload["speaking_rate"] = speaking_rate
+
+        if pitch:
+            payload["pitch"] = pitch
 
         if seed is not None:
             payload["seed"] = seed
@@ -140,6 +154,9 @@ class TTSClient:
             # Extract voice mapping from voice info
             voice_mapping = self._extract_voice_mapping(voice_info)
 
+            # Upload voice samples for cloning if specified in voice info
+            self._upload_voice_samples(voice_info)
+
             # Process each dialogue entry
             dialogues = dialogue_data.get("dialogues", [])
             print(f"Processing {len(dialogues)} dialogue entries...")
@@ -155,6 +172,24 @@ class TTSClient:
             import traceback
             traceback.print_exc()
             return False
+
+    def _upload_voice_samples(self, voice_info: Dict[str, Any]):
+        """Upload voice samples for cloning if specified."""
+        voices = voice_info.get("voices", [])
+
+        for voice in voices:
+            voice_id = voice.get("id")
+            name = voice.get("name", "Unknown")
+            description = voice.get("description", "")
+
+            cloning = voice.get("cloning", {})
+            if cloning and cloning.get("enabled", False):
+                audio_file = cloning.get("audio_file")
+                if audio_file and os.path.exists(audio_file):
+                    print(f"Uploading voice sample for {name} ({voice_id})...")
+                    self.upload_voice_sample(voice_id, name, description, audio_file)
+                else:
+                    print(f"Warning: Voice sample file not found for {name}: {audio_file}")
 
     def _extract_voice_mapping(self, voice_info: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         """Extract voice mapping from voice info (case-insensitive)."""
@@ -213,23 +248,18 @@ class TTSClient:
         return None
 
     def _get_emotion_vector(self, emotion: str, voice: Dict[str, Any]) -> List[float]:
-        """Get the emotion vector for a given emotion and voice."""
+        """Get the emotion vector for a given emotion name using the voice's parameters."""
         # Default emotion vector
         default_vector = [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077]
 
         if not voice:
             return default_vector
 
-        # Try to find the emotion in the voice's emotional profiles
-        emotional_profiles = voice.get("emotional_profiles", {})
+        # In the new format, we'll directly use the emotion_vector from zonos_parameters
+        zonos_params = voice.get("zonos_parameters", {})
+        if "emotion_vector" in zonos_params:
+            return zonos_params["emotion_vector"]
 
-        # Case-insensitive emotion lookup
-        for emotion_key, profile in emotional_profiles.items():
-            if self.normalize_id(emotion_key) == self.normalize_id(emotion):
-                if "emotion_vector" in profile:
-                    return profile["emotion_vector"]
-
-        # Return default vector if no matching emotion found
         return default_vector
 
     def _process_dialogue_entry(self, entry: Dict[str, Any], voice_mapping: Dict[str, Dict[str, Any]]) -> bool:
@@ -253,24 +283,19 @@ class TTSClient:
             # Get voice and emotion
             voice = self._get_voice_for_entry(entry, voice_mapping)
             emotion_name = entry.get("emotion", "neutral")
+
+            # Get emotional parameters
             emotion_vector = self._get_emotion_vector(emotion_name, voice)
 
-            # Generate speech
+            # Get voice-specific parameters
             voice_id = voice.get("id") if voice else None
+            speaking_rate = None
+            pitch = None
 
-            # Apply appropriate speaking rate
-            speaking_rate = 15.0  # Default
-            if voice and "default_parameters" in voice:
-                speaking_rate = voice["default_parameters"].get("speaking_rate", 15.0)
-
-            # Apply emotional speaking rate adjustment
-            if voice and "emotional_profiles" in voice:
-                # Case-insensitive emotion lookup
-                for emotion_key, profile in voice["emotional_profiles"].items():
-                    if self.normalize_id(emotion_key) == self.normalize_id(emotion_name):
-                        speaking_rate_adjustment = profile.get("speaking_rate_adjustment", 0)
-                        speaking_rate += speaking_rate_adjustment
-                        break
+            if voice and "zonos_parameters" in voice:
+                zonos_params = voice.get("zonos_parameters", {})
+                speaking_rate = zonos_params.get("speaking_rate")
+                pitch = zonos_params.get("pitch")
 
             # Generate a seed based on the resource name for consistency
             import hashlib
@@ -279,8 +304,9 @@ class TTSClient:
             result = self.generate_speech(
                 text=text,
                 voice_id=voice_id,
-                emotion=emotion_vector,
+                emotion_vector=emotion_vector,
                 speaking_rate=speaking_rate,
+                pitch=pitch,
                 seed=seed
             )
 
@@ -301,14 +327,34 @@ def main():
     parser = argparse.ArgumentParser(description="TTS Client for processing dialogue files")
     parser.add_argument("--api", type=str, default="http://localhost:8000", help="TTS API URL")
 
-    # Create a group of arguments for when --list-voices is not specified
-    dialogue_group = parser.add_argument_group('dialogue processing')
-    dialogue_group.add_argument("--dialogue", type=str, help="Path to dialogue JSON file")
-    dialogue_group.add_argument("--voice-info", type=str, help="Path to voice info JSON file")
-    dialogue_group.add_argument("--output", type=str, default="output_audio", help="Output directory for audio files")
+    # Create subparsers for different commands
+    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
 
-    # Add list-voices argument
-    parser.add_argument("--list-voices", action="store_true", help="List available voices and exit")
+    # Dialogue processing command
+    dialogue_parser = subparsers.add_parser('dialogue', help='Process dialogue files')
+    dialogue_parser.add_argument("--dialogue", type=str, required=True, help="Path to dialogue JSON file")
+    dialogue_parser.add_argument("--voice-info", type=str, required=True, help="Path to voice info JSON file")
+    dialogue_parser.add_argument("--output", type=str, default="output_audio", help="Output directory for audio files")
+
+    # List voices command
+    list_voices_parser = subparsers.add_parser('list-voices', help='List available voices')
+
+    # Upload voice sample command
+    upload_parser = subparsers.add_parser('upload-sample', help='Upload a voice sample')
+    upload_parser.add_argument("--voice-id", type=str, required=True, help="Voice ID to upload sample for")
+    upload_parser.add_argument("--name", type=str, required=True, help="Voice name")
+    upload_parser.add_argument("--description", type=str, default="", help="Voice description")
+    upload_parser.add_argument("--file", type=str, required=True, help="Path to audio file")
+
+    # Upload voice info command
+    upload_info_parser = subparsers.add_parser('upload-info', help='Upload voice info')
+    upload_info_parser.add_argument("--voice-info", type=str, required=True, help="Path to voice info JSON file")
+
+    # Generate speech command
+    generate_parser = subparsers.add_parser('generate', help='Generate speech from text')
+    generate_parser.add_argument("--text", type=str, required=True, help="Text to convert to speech")
+    generate_parser.add_argument("--voice-id", type=str, help="Voice ID to use")
+    generate_parser.add_argument("--output", type=str, default="output.wav", help="Output audio file")
 
     args = parser.parse_args()
 
@@ -319,20 +365,54 @@ def main():
         print("Failed to connect to TTS API server. Exiting.")
         sys.exit(1)
 
-    # List voices if requested
-    if args.list_voices:
+    # Process the command
+    if args.command == 'list-voices':
         voices = client.list_voices()
         print("Available voices:")
         for voice in voices:
             print(f"  - {voice.get('id')}: {voice.get('name', '')}")
-        sys.exit(0)
+            cloning = voice.get("cloning", {})
+            if cloning and cloning.get("enabled", False):
+                print(f"    Voice cloning enabled: {cloning.get('audio_file', 'No sample file')}")
 
-    # If not listing voices, ensure dialogue and voice-info are provided
-    if not args.dialogue or not args.voice_info:
-        parser.error("Both --dialogue and --voice-info are required when not using --list-voices")
+    elif args.command == 'upload-sample':
+        success = client.upload_voice_sample(
+            args.voice_id, args.name, args.description, args.file
+        )
+        if success:
+            print(f"Successfully uploaded voice sample for {args.voice_id}")
+        else:
+            print(f"Failed to upload voice sample")
 
-    # Process dialogue file
-    client.process_dialogue_file(args.dialogue, args.voice_info, args.output)
+    elif args.command == 'upload-info':
+        with open(args.voice_info, "r", encoding="utf-8") as f:
+            voice_info = json.load(f)
+        file_id = client.upload_voice_info(voice_info)
+        print(f"Uploaded voice info with ID: {file_id}")
+
+        # If voice info contains samples, upload those too
+        client._upload_voice_samples(voice_info)
+
+    elif args.command == 'generate':
+        result = client.generate_speech(args.text, args.voice_id)
+        if result:
+            file_url = result.get("file_url")
+            if file_url:
+                success = client.download_file(file_url, args.output)
+                if success:
+                    print(f"Generated speech saved to {args.output}")
+                else:
+                    print("Failed to download generated speech")
+            else:
+                print("No file URL returned")
+        else:
+            print("Failed to generate speech")
+
+    elif args.command == 'dialogue':
+        client.process_dialogue_file(args.dialogue, args.voice_info, args.output)
+
+    else:
+        parser.print_help()
 
 if __name__ == "__main__":
     main()
