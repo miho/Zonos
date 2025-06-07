@@ -16,3 +16,5 @@ huggingface/
 chunk_out/
 
 data/
+
+output*/
