@@ -1,0 +1,143 @@
+{
+  "audio_processing_jobs": [
+    {
+      "source": "narration_raw.wav",
+      "target": "narration_clean_and_mastered.wav",
+      "effects": [
+        {
+          "name": "high_pass_filter",
+          "parameters": { "cutoff_hz": 80 }
+        },
+        {
+          "name": "noise_reduction",
+          "parameters": { "strength": 0.9 }
+        },
+        {
+          "name": "de-esser",
+          "parameters": { "threshold_db": -20, "ratio": 3 }
+        },
+        {
+          "name": "equalizer",
+          "parameters": {
+            "bands": [
+              { "type": "peak", "frequency": 300, "gain_db": -2.5, "q": 1.5 },
+              { "type": "high_shelf", "frequency": 5000, "gain_db": 2.0, "q": 0.7 }
+            ]
+          }
+        },
+        {
+          "name": "compressor",
+          "parameters": { "threshold_db": -18, "ratio": 3.5, "attack_ms": 5, "release_ms": 150 }
+        },
+        {
+          "name": "loudness_normalization",
+          "parameters": { "headroom_db": 1.5 }
+        },
+        {
+          "name": "limiter",
+          "parameters": { "threshold_db": -1.0 }
+        }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_telephone.wav",
+      "effects": [
+        { "name": "telephone" }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_announcement.wav",
+      "effects": [
+        { "name": "announcement" }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_walkie_talkie.wav",
+      "effects": [
+        { "name": "walkie_talkie" }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_robot.wav",
+      "effects": [
+        { "name": "robot", "parameters": { "pitch_semitones": -3 } }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_ghost.wav",
+      "effects": [
+        { "name": "ghost" }
+      ]
+    },
+    {
+      "source": "character_dialogue.wav",
+      "target": "character_muffled.wav",
+      "effects": [
+        { "name": "muffled" }
+      ]
+    },
+    {
+      "source": "musical_sting.mp3",
+      "target": "musical_sting_panned_left.mp3",
+      "effects": [
+        { "name": "panning", "parameters": { "pan": -0.75 } }
+      ]
+    },
+    {
+      "source": "giant_voice.wav",
+      "target": "giant_voice_pitched.wav",
+      "effects": [
+        { "name": "pitch_shift", "parameters": { "semitones": -5 } }
+      ]
+    },
+    {
+      "source": "cave_sound.wav",
+      "target": "cave_sound_reverb_delay.wav",
+      "effects": [
+        {
+          "name": "reverb",
+          "parameters": { "room_size": 0.9, "damping": 0.8, "wet_level": 0.5 }
+        },
+        {
+          "name": "delay",
+          "parameters": { "delay_seconds": 0.6, "feedback": 0.4, "mix": 0.3 }
+        }
+      ]
+    },
+    {
+      "source": "music_intro.mp3",
+      "target": "music_intro_faded_in.mp3",
+      "effects": [
+        {
+          "name": "fade_in",
+          "parameters": { "duration_ms": 2500 }
+        }
+      ]
+    },
+    {
+      "source": "narration_clean_and_mastered.wav",
+      "target": "narration_with_pause.wav",
+      "effects": [
+        {
+          "name": "silence",
+          "parameters": { "duration_ms": 1500, "position": "end" }
+        }
+      ]
+    },
+    {
+      "source": "music_outro.mp3",
+      "target": "music_outro_faded_out.mp3",
+      "effects": [
+        {
+          "name": "fade_out",
+          "parameters": { "duration_ms": 4000 }
+        }
+      ]
+    }
+  ]
+}
