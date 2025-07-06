@@ -1,0 +1,76 @@
+{
+  "effect_presets": {
+    "standard-narration-master": {
+      "description": "A full mastering chain for clean, professional narration.",
+      "effects": [
+        { "name": "high_pass_filter", "parameters": { "cutoff_hz": 80 } },
+        { "name": "noise_reduction", "parameters": { "strength": 0.9 } },
+        // { "name": "de-esser", "parameters": { "threshold_db": -20, "ratio": 3 } },
+        {
+          "name": "equalizer",
+          "parameters": {
+            "bands": [
+              { "type": "peak", "frequency": 300, "gain_db": -2.5, "q": 1.5 },
+              { "type": "high_shelf", "frequency": 5000, "gain_db": 2.0, "q": 0.7 }
+            ]
+          }
+        },
+        { "name": "compressor", "parameters": { "threshold_db": -18, "ratio": 3.5 } },
+        { "name": "loudness_normalization", "parameters": { "headroom_db": 1.5 } },
+        { "name": "limiter", "parameters": { "threshold_db": -1.0 } }
+      ]
+    },
+    "walkie-talkie-strong": {
+      "description": "The original, strong walkie-talkie effect.",
+      "effects": [
+        {
+          "name": "walkie_talkie",
+          "parameters": {
+            "high_pass_hz": 400,
+            "low_pass_hz": 2800,
+            "compressor_ratio": 8.0,
+            "gain_db": 5
+          }
+        }
+      ]
+    },
+    "walkie-talkie-subtle": {
+      "description": "A less intense, clearer walkie-talkie effect.",
+      "effects": [
+        {
+          "name": "walkie_talkie",
+          "parameters": {
+            "high_pass_hz": 5,
+            "low_pass_hz": 50,
+            "compressor_ratio": 16.0,
+            "gain_db": 16
+          }
+        }
+      ]
+    },
+    "ghostly-echo": {
+      "description": "An ethereal, spooky voice effect for spirits or dreams.",
+      "effects": [
+        { "name": "ghost" }
+      ]
+    },
+    "giant-voice": {
+      "description": "A deep, booming voice for a large character.",
+      "effects": [
+        { "name": "pitch_shift", "parameters": { "semitones": -5 } }
+      ]
+    },
+    "robot-voice": {
+      "description": "A metallic, synthetic voice for an AI or android.",
+      "effects": [
+        { "name": "robot", "parameters": { "flanger_rate_hz": 1.2, "pitch_semitones": -2 } }
+      ]
+    },
+    "muffled-through-wall": {
+      "description": "Makes audio sound like it's coming from another room.",
+      "effects": [
+        { "name": "muffled" }
+      ]
+    }
+  }
+}

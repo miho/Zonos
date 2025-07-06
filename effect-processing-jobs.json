@@ -1,0 +1,133 @@
+
+{
+  "effect_presets": {
+    "train_station_pa": {
+        "effects": [
+
+          /* 1 ----- steep band-pass 150–5500 Hz */
+          { "name": "high_pass_filter",
+            "parameters": { "cutoff_hz": 150 } },
+
+          { "name": "low_pass_filter",
+            "parameters": { "cutoff_hz": 5500 } },
+
+          /* 2 ----- mid-range resonance (+6 dB at 1.6 kHz, Q≈2) */
+          { "name": "equalizer",
+            "parameters": {
+              "bands": [
+                { "type": "peak",
+                  "cutoff_frequency_hz": 1800,
+                  "gain_db": 6,
+                  "q": 2.0 }
+              ]
+            }},
+
+          /* 3 ----- heavy bus compression */
+          { "name": "compressor",
+            "parameters": {
+              "threshold_db": -18,
+              "ratio": 8,
+              "attack_ms": 3,
+              "release_ms": 120 }},
+
+          /* 4 ----- short slap-back echo ( ms) */
+          { "name": "delay",
+            "parameters": {
+              "delay_seconds": 0.15,
+              "feedback": 0.45,
+              "mix": 0.35 }},
+
+          /* 5 ----- diffuse hall reverb */
+          { "name": "reverb",
+            "parameters": {
+              "room_size": 0.7,
+              "damping": 0.6,
+              "wet_level": 0.35,
+              "dry_level": 0.9 }},
+
+          /* 6 ----- output limiter (-1 dB ceiling) */
+          { "name": "limiter",
+            "parameters": { "thre shold_db": -5 } }
+        ]
+    },    
+    "radio_chatter": {
+      "effects": [
+        { "name": "walkie_talkie", "parameters": { "gain_db": 5, "am_depth": 0.195, "static_level_db": -35, "hp": 400, "lp": 2500, "thresh": -28, "ratio": 2, "crush_bits": 4 } }
+        // { "name": "reverb", "parameters": { "room_size": 0.75, "damping": 0.5, "wet_level": 0.3, "dry_level": 0.7, "width": 1.0, "freeze_mode": false } }
+        // { "name": "silence", "parameters": { "duration_ms": 500, "position": "start" } },
+        // { "name": "silence", "parameters": { "duration_ms": 1500, "position": "end" } }
+      ]
+  },
+  "padding": {
+    "effects": [
+      { "name": "silence", "parameters": { "duration_ms": 1500, "position": "start" } },
+      { "name": "silence", "parameters": { "duration_ms": 1500, "position": "end" } }
+    ]
+  },
+  "muffled": {
+    "effects": [
+      { "name": "muffled", "parameters": { "low_pass_hz": 10, "high_pass_hz": 800, "gain_db": -1, "strength": 0.01} }
+    ]
+  },
+  "ghost": {
+    "effects": [
+      { "name": "ghost", "parameters": { "room_size": 0.45, "wet_level": 0.75, "dry_level": 0.35, "damping": 0.58,"delay_ms": 200, "feedback": 0.55, "mix": 0.25 } }
+    ]
+  },
+  "telephone": {
+    "effects": [
+      {
+          "name": "telephone",
+          "parameters": {
+            "hp": 450,      
+            "lp": 2500,        
+            "slope_stages": 6, 
+            "comp_thresh": -18,
+            "comp_ratio": 7,
+            "crush_bits": 5,    
+            "resonance_hz": 1000,
+            "resonance_db": 7,
+            "gain_db": 4
+          }
+        }
+   ]
+  },
+  "robot": {
+    "effects": [
+      { 
+        "name": "robot",
+        "parameters": {
+          "rate_hz": 0.6,
+          "depth": 0.95,
+          "centre_delay_ms": 5,
+          "mix": 1.0,
+          "pitch_semitones": -3
+        }
+      }
+    ]
+  }
+
+},
+
+"audio_processing_jobs": [
+    {
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure-effect.wav",
+      // "apply_preset": "telephone",
+      // "apply_preset": "radio_chatter",
+      // "apply_preset": "robot",
+      // "apply_preset": "padding",
+      "apply_preset": "train_station_pa",
+      "pad_start_ms": 1500,
+      "pad_end_ms"  : 3200
+    },
+    {
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\someother_wav.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\someother_wav-effect.wav",
+      "effects": [
+        { "name": "noise_reduction", "parameters": { "strength": 0.9 } },
+        { "name": "loudness_normalization", "parameters": { "headroom_db": 0.5 } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+
+{
+  "effect_presets": {
+    "radio_chatter": {
+      "effects": [
+        { "name": "walkie_talkie", "parameters": { "gain_db": 3 } },
+        { "name": "limiter", "parameters": { "threshold_db": -1 } }
+      ]
+    }
+  },
+
+  "audio_processing_jobs": [
+    {
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure-effect.wav",
+      "apply_preset": "radio_chatter"
+    },
+
+    {
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.confronts_figure-effect1.wav",
+      "effects": [
+        { "name": "noise_reduction", "parameters": { "strength": 0.9 } },
+        { "name": "deesser", "parameters": {} },
+        { "name": "loudness_normalization", "parameters": { "headroom_db": 0.5 } }
+      ]
+    }
+  ]
+}
