@@ -127,8 +127,8 @@
           }
       },
       { "name": "static", "parameters": { "level_db": -50} },
-      { "name": "fade_in", "parameters": { "duration_ms": 3000 } },
-      { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
+    //   { "name": "fade_in", "parameters": { "duration_ms": 3000 } },
+    //   { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
    ]
   },
   "robot": {
@@ -146,13 +146,17 @@
     ]
   },
   "large_room": {
+    "pad_start_ms": 1000,
+    "pad_end_ms"  : 1000,
     "effects": [
-      { "name": "reverb", "parameters": { "room_size": 0.8, "damping": 0.5, "wet_level": 0.4, "dry_level": 0.6, "width": 1.0, "freeze_mode": false } }
+      { "name": "reverb", "parameters": { "room_size": 0.7, "damping": 0.5, "wet_level": 0.4, "dry_level": 0.6, "width": 1.0, "freeze_mode": false } }
     ]
   },
   "small_room": {
+    "pad_start_ms": 500,
+    "pad_end_ms"  : 500,
     "effects": [
-      { "name": "reverb", "parameters": { "room_size": 0.3, "damping": 0.5, "wet_level": 0.2, "dry_level": 0.8, "width": 1.0, "freeze_mode": false } }
+      { "name": "reverb", "parameters": { "room_size": 0.2, "damping": 0.5, "wet_level": 0.2, "dry_level": 0.8, "width": 1.0, "freeze_mode": false } }
     ]
   },
   "dramatic_echo": {
