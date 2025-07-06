@@ -5,11 +5,23 @@ from pydub import AudioSegment
 from pydub.effects import normalize
 from pedalboard import (
     Pedalboard, Reverb, Compressor, Delay, PitchShift, Limiter,
-    HighpassFilter, LowpassFilter, PeakFilter, HighShelfFilter, LowShelfFilter,
-    Flanger, Deesser
+    HighpassFilter, LowpassFilter, PeakFilter, HighShelfFilter, LowShelfFilter
 )
 import noisereduce as nr
 import warnings
+
+# --- Graceful import for newer pedalboard effects ---
+try:
+    from pedalboard import Flanger
+    FLANGER_AVAILABLE = True
+except ImportError:
+    FLANGER_AVAILABLE = False
+
+try:
+    from pedalboard import Deesser
+    DEESSER_AVAILABLE = True
+except ImportError:
+    DEESSER_AVAILABLE = False
 
 # Suppress warnings from pydub about FFmpeg/avconv
 warnings.filterwarnings("ignore", category=UserWarning, module='pydub.utils')
@@ -21,10 +33,8 @@ def apply_pedalboard_effect(audio, board):
     
     # Pedalboard expects mono or stereo, handle different channel counts
     if audio.channels > 2:
-        # Process only the first two channels for simplicity
         samples = samples.reshape((-1, audio.channels))[:, :2]
     elif audio.channels == 1:
-        # Pedalboard works with 2D arrays (num_samples, num_channels)
         samples = samples.reshape((-1, 1))
 
     effected_samples = board(samples, audio.frame_rate)
@@ -112,6 +122,9 @@ def effect_noise_reduction(audio, params):
 def effect_deesser(audio, params):
     """Applies a de-esser to reduce sibilance."""
     print("  Applying: De-Esser")
+    if not DEESSER_AVAILABLE:
+        print("  Warning: Deesser effect not available. Please upgrade pedalboard: pip install --upgrade pedalboard. Skipping effect.")
+        return audio
     board = Pedalboard([Deesser(**params)])
     return apply_pedalboard_effect(audio, board)
 
@@ -130,7 +143,7 @@ def effect_equalizer(audio, params):
         gain = band.get('gain_db')
         q = band.get('q', 1.0)
         
-        if not all([freq, gain]):
+        if not all([freq, gain is not None]):
             continue
             
         if band_type == 'peak':
@@ -189,11 +202,15 @@ def effect_walkie_talkie(audio, params):
         Compressor(threshold_db=-25, ratio=8),
     ])
     distorted = apply_pedalboard_effect(audio, board)
-    return distorted.apply_gain(params.get('gain_db', 5))
+    return distorted.apply_gain(params.get('gain_db', 0.1))
 
 def effect_robot(audio, params):
     """Simulates a robot voice."""
     print("  Applying: Robot Effect")
+    if not FLANGER_AVAILABLE:
+        print("  Warning: Flanger effect not available. Please upgrade pedalboard: pip install --upgrade pedalboard. Skipping effect.")
+        return audio
+        
     board = Pedalboard([
         Flanger(rate_hz=params.get('flanger_rate_hz', 0.8), depth=params.get('flanger_depth', 0.9)),
         PitchShift(semitones=params.get('pitch_semitones', -2))
@@ -250,24 +267,13 @@ EFFECT_DISPATCHER = {
 }
 
 
-def process_audio_from_json(json_path):
+def process_jobs(jobs, presets):
     """
-    Reads a JSON file to apply a chain of audio effects to files.
+    Processes a list of audio jobs using a dictionary of presets.
     """
-    try:
-        with open(json_path, 'r') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: JSON file not found at {json_path}")
-        return
-    except json.JSONDecodeError:
-        print(f"Error: Could not decode JSON from {json_path}. Please check its format.")
-        return
-
-    for i, item in enumerate(data.get('audio_processing_jobs', [])):
+    for i, item in enumerate(jobs):
         source_path = item.get('source')
         target_path = item.get('target')
-        effects_to_apply = item.get('effects', [])
         
         if not source_path or not target_path:
             print(f"Skipping job {i+1} due to missing 'source' or 'target' path.")
@@ -285,6 +291,26 @@ def process_audio_from_json(json_path):
             print(f"Error loading {source_path}: {e}. Skipping job.")
             continue
 
+        effects_to_apply = []
+        preset_name = item.get('apply_preset')
+
+        if preset_name:
+            if preset_name in presets:
+                print(f"Applying preset: '{preset_name}'")
+                effects_to_apply = presets[preset_name].get('effects', [])
+            else:
+                print(f"Warning: Preset '{preset_name}' not found. Skipping job.")
+                continue
+        else:
+            # Fallback to inline effects if no preset is specified
+            effects_to_apply = item.get('effects', [])
+            if effects_to_apply:
+                 print("Applying inline effects.")
+
+        if not effects_to_apply:
+            print("Warning: No effects or valid preset found for this job. Skipping.")
+            continue
+            
         # Apply the chain of effects
         processed_audio = audio
         for effect in effects_to_apply:
@@ -312,16 +338,62 @@ def process_audio_from_json(json_path):
     print("\n--- All jobs completed. ---")
 
 
-if __name__ == '__main__':
+def main():
+    """
+    Main function to parse arguments and run the audio processing.
+    """
     parser = argparse.ArgumentParser(
         description="A command-line tool to apply a chain of audio effects to files based on a JSON configuration.",
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
-        "json_file",
+        "jobs_file",
         help="Path to the JSON file containing the audio processing jobs."
+    )
+    parser.add_argument(
+        "--presets",
+        dest="presets_file",
+        help="Optional path to a separate JSON file containing effect presets."
     )
     
     args = parser.parse_args()
     
-    process_audio_from_json(args.json_file)
+    # Load jobs file
+    try:
+        with open(args.jobs_file, 'r') as f:
+            jobs_data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Jobs file not found at {args.jobs_file}")
+        return
+    except json.JSONDecodeError:
+        print(f"Error: Could not decode JSON from {args.jobs_file}. Please check its format.")
+        return
+
+    jobs = jobs_data.get('audio_processing_jobs', [])
+    presets = {}
+
+    # Load presets
+    if args.presets_file:
+        print(f"Loading presets from separate file: {args.presets_file}")
+        try:
+            with open(args.presets_file, 'r') as f:
+                presets_data = json.load(f)
+                presets = presets_data.get('effect_presets', {})
+        except FileNotFoundError:
+            print(f"Warning: Presets file not found at {args.presets_file}. Continuing without presets.")
+        except json.JSONDecodeError:
+            print(f"Warning: Could not decode JSON from {args.presets_file}. Continuing without presets.")
+    else:
+        # Look for presets embedded in the main jobs file
+        if 'effect_presets' in jobs_data:
+            print("Loading presets embedded in jobs file.")
+            presets = jobs_data.get('effect_presets', {})
+
+    if not presets:
+        print("No presets loaded. Only inline effects will be processed.")
+
+    process_jobs(jobs, presets)
+
+
+if __name__ == '__main__':
+    main()
