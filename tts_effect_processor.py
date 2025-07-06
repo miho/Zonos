@@ -284,6 +284,21 @@ def fx_panning(seg, p):           return seg.pan(p.get("pan", 0.0))
 def fx_loudness(seg, p):          return normalize(seg, p.get("headroom_db", 0.1))
 def fx_limiter(seg, p):           return run_board(seg, Pedalboard([Limiter(**p)]))
 
+def fx_static(seg: AudioSegment, p: dict) -> AudioSegment:
+    """
+    Generate static noise and overlay it on the input segment.
+    JSON parameters (all optional, defaults shown):
+        level_db : -35
+        
+
+    """
+    level_db = p.get("level_db", -35)
+    if level_db >= 0:
+        print("Warning: Static noise level must be negative – skipping.")
+        return seg
+    static = _make_static(seg, level_db)
+    return seg.overlay(static)
+
 def fx_robot(seg: AudioSegment, p: dict) -> AudioSegment:
     """
     Robot voice:
@@ -363,6 +378,7 @@ FX = {
     "robot": fx_robot,
     "ghost": fx_ghost,
     "muffled": fx_muffled,
+    "static": fx_static,
 }
 
 ###############################################################################

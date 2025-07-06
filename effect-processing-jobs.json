@@ -3,7 +3,6 @@
   "effect_presets": {
     "train_station_pa": {
         "effects": [
-
           /* 1 ----- steep band-pass 150–5500 Hz */
           { "name": "high_pass_filter",
             "parameters": { "cutoff_hz": 150 } },
@@ -50,7 +49,7 @@
             "parameters": { "threshold_db": -5 } }
         ]
     },
-    "radio_chatter": {
+    "walkie-talkie": {
       "effects": [
         { "name": "walkie_talkie", "parameters": { "gain_db": 5, "am_depth": 0.195, "static_level_db": -35, "hp": 400, "lp": 2500, "thresh": -28, "ratio": 2, "crush_bits": 4 } }
         // { "name": "reverb", "parameters": { "room_size": 0.75, "damping": 0.5, "wet_level": 0.3, "dry_level": 0.7, "width": 1.0, "freeze_mode": false } }
@@ -92,6 +91,27 @@
         }
    ]
   },
+  "recording": {
+    "effects": [
+      {
+          "name": "telephone",
+          "parameters": {
+            "hp": 450,      
+            "lp": 2500,        
+            "slope_stages": 6, 
+            "comp_thresh": -18,
+            "comp_ratio": 7,
+            "crush_bits": 5,    
+            "resonance_hz": 1000,
+            "resonance_db": 7,
+            "gain_db": 4
+          }
+      },
+      { "name": "static", "parameters": { "level_db": -50} },
+      { "name": "fade_in", "parameters": { "duration_ms": 3000 } },
+      { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
+   ]
+  },
   "robot": {
     "effects": [
       { 
@@ -105,7 +125,34 @@
         }
       }
     ]
-  }
+  },
+  "large_room": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.8, "damping": 0.5, "wet_level": 0.4, "dry_level": 0.6, "width": 1.0, "freeze_mode": false } }
+    ]
+  },
+  "small_room": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.3, "damping": 0.5, "wet_level": 0.2, "dry_level": 0.8, "width": 1.0, "freeze_mode": false } }
+    ]
+  },
+  "dramatic_echo": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.9, "damping": 0.4, "wet_level": 0.5, "dry_level": 0.5, "width": 1.0, "freeze_mode": false } },
+      { "name": "delay", "parameters": { "delay_seconds": 0.3, "feedback": 0.6, "mix": 0.4 } }
+    ]
+  },
+  "fade-out" : {
+    "effects": [
+      { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
+    ]
+  },
+
+  "fade-in" : {
+    "effects": [
+      { "name": "fade_in", "parameters": { "duration_ms": 3000 } }
+    ]
+  },
 
 },
 
@@ -117,7 +164,8 @@
       // "apply_preset": "radio_chatter",
       // "apply_preset": "robot",
       // "apply_preset": "padding",
-      "apply_preset": "train_station_pa",
+      // "apply_preset": "train_station_pa",
+      "apply_preset": "recording",
       "pad_start_ms": 1500,
       "pad_end_ms"  : 3200
     },
