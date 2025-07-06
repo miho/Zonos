@@ -418,15 +418,29 @@ def process_jobs(jobs: list[dict], presets: dict):
 
         print(f"\nJob {idx}: {src} → {dst}")
 
+        # ---------------- Get preset (if any) --------------------
+        preset_name  = job.get("apply_preset")
+        preset_data  = presets.get(preset_name, {}) if preset_name else {}
+        if preset_name and not preset_data:
+            print(f"  !! Preset '{preset_name}' not found - skipped.")
+            continue
+
         try:
             audio = AudioSegment.from_file(src)
         except Exception as e:
-            print(f"  Cannot open source: {e} – skipped.")
+            print(f"  Cannot open source: {e} - skipped.")
             continue
+        
 
-        # ---------- NEW: optional head / tail padding ----------
-        pre  = int(job.get("pad_start_ms", 0))
-        post = int(job.get("pad_end_ms",   0))
+# --------------- Resolve padding ------------------------
+        pre  = job.get("pad_start_ms",
+                       preset_data.get("pad_start_ms", 0))
+        post = job.get("pad_end_ms",
+                       preset_data.get("pad_end_ms",   0))
+
+        pre  = int(pre)  if pre  else 0
+        post = int(post) if post else 0
+
         if pre or post:
             print(f"  Padding: {pre} ms head  /  {post} ms tail")
             audio = pad_audio(audio, pre, post)
