@@ -47,9 +47,9 @@
 
           /* 6 ----- output limiter (-1 dB ceiling) */
           { "name": "limiter",
-            "parameters": { "thre shold_db": -5 } }
+            "parameters": { "threshold_db": -5 } }
         ]
-    },    
+    },
     "radio_chatter": {
       "effects": [
         { "name": "walkie_talkie", "parameters": { "gain_db": 5, "am_depth": 0.195, "static_level_db": -35, "hp": 400, "lp": 2500, "thresh": -28, "ratio": 2, "crush_bits": 4 } }

@@ -450,9 +450,11 @@ import regex as re
 def load_json(path: str | Path) -> dict:
     try:
         with open(path, "r") as f:
-            # remove comments (single and block) and load JSON
+            # remove comments (single and block)
             content = f.read()
             content = re.sub(r"//.*?$|/\*.*?\*/", "", content, flags=re.DOTALL | re.MULTILINE)
+            # remove trailing commas before } or ]
+            content = re.sub(r",\s*([}\]])", r"\1", content)
             return json.loads(content)
     except Exception as e:
         print(f"Could not load {path}: {e}")
