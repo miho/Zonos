@@ -42,7 +42,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pydub.utils")
 
 INT_RANGES = {1: 128, 2: 32768, 4: 2147483648}  # absolute max for int{8,16,32}
 
-
 def seg_to_float32(seg: AudioSegment) -> tuple[np.ndarray, int]:
     """
     AudioSegment ➜ float32 np.ndarray in range −1 … 1
@@ -53,7 +52,6 @@ def seg_to_float32(seg: AudioSegment) -> tuple[np.ndarray, int]:
     if seg.channels > 1:
         floats = floats.reshape(-1, seg.channels)
     return floats, seg.frame_rate
-
 
 def float32_to_seg(samples: np.ndarray, sr: int, template: AudioSegment) -> AudioSegment:
     """
@@ -72,12 +70,10 @@ def float32_to_seg(samples: np.ndarray, sr: int, template: AudioSegment) -> Audi
         channels=samples.shape[1] if samples.ndim == 2 else 1,
     )
 
-
 def run_board(seg: AudioSegment, board: Pedalboard) -> AudioSegment:
     x, sr = seg_to_float32(seg)
     y = board(x, sr)
     return float32_to_seg(y, sr, seg)
-
 
 ###############################################################################
 # Individual Effects                                                          #
@@ -463,15 +459,115 @@ def process_jobs(jobs: list[dict], presets: dict):
 import regex as re
 
 
+###############################################################################
+# CLI helpers                                                                 #
+###############################################################################
+def _strip_json_comments(src: str) -> str:
+    """
+    Remove // and /* */ comments that are *outside* quoted strings.
+    """
+    out, i, ln = [], 0, len(src)
+    in_str, esc = False, False
+
+    while i < ln:
+        c = src[i]
+
+        # toggle string context
+        if in_str:
+            out.append(c)
+            if esc:
+                esc = False
+            elif c == "\\":                # escape next char
+                esc = True
+            elif c == '"':                 # closing quote
+                in_str = False
+            i += 1
+            continue
+
+        if c == '"':                       # opening quote
+            in_str = True
+            out.append(c)
+            i += 1
+            continue
+
+        # we are *outside* a string ------------------------------------------
+        if c == "/" and i + 1 < ln:
+            nxt = src[i + 1]
+            if nxt == "/":                 # single-line comment
+                i += 2
+                while i < ln and src[i] not in ("\n", "\r"):
+                    i += 1
+                continue
+            if nxt == "*":                 # block comment
+                i += 2
+                while i + 1 < ln and not (src[i] == "*" and src[i + 1] == "/"):
+                    i += 1
+                i += 2                     # skip closing */
+                continue
+
+        out.append(c)
+        i += 1
+
+    return "".join(out)
+
+
+def _strip_trailing_commas(src: str) -> str:
+    """
+    Remove trailing commas before } or ] (again, outside quoted strings).
+    """
+    pattern = []
+    in_str, esc = False, False
+    for c in src:
+        if in_str:
+            pattern.append(c)
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+            pattern.append(c)
+            continue
+        # outside string
+        if c == ",":
+            pattern.append("\u0000")       # sentinel so we can lookahead
+        else:
+            pattern.append(c)
+
+    cleaned = []
+    it = iter(range(len(pattern)))
+    for idx in it:
+        ch = pattern[idx]
+        if ch == "\u0000":                 # our sentinel
+            # look ahead for next non-space
+            j = idx + 1
+            while j < len(pattern) and pattern[j].isspace():
+                j += 1
+            if j < len(pattern) and pattern[j] in ("]", "}"):
+                # skip comma
+                continue
+            cleaned.append(",")
+        else:
+            cleaned.append(ch)
+    return "".join(cleaned)
+
+
 def load_json(path: str | Path) -> dict:
+    """
+    Load a JSON / JSONC file:
+      • supports // and /* */ comments
+      • supports trailing commas
+      • leaves anything inside quotes untouched
+    """
     try:
-        with open(path, "r") as f:
-            # remove comments (single and block)
-            content = f.read()
-            content = re.sub(r"//.*?$|/\*.*?\*/", "", content, flags=re.DOTALL | re.MULTILINE)
-            # remove trailing commas before } or ]
-            content = re.sub(r",\s*([}\]])", r"\1", content)
-            return json.loads(content)
+        with open(path, "r", encoding="utf-8") as f:
+            txt = f.read()
+        txt = _strip_json_comments(txt)
+        txt = _strip_trailing_commas(txt)
+        return json.loads(txt)
     except Exception as e:
         print(f"Could not load {path}: {e}")
         return {}

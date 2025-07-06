@@ -1,6 +1,6 @@
 {
   "effect_presets": {
-    "standard-narration-master": {
+    "narration-master": {
       "description": "A full mastering chain for clean, professional narration.",
       "effects": [
         { "name": "high_pass_filter", "parameters": { "cutoff_hz": 80 } },
@@ -19,58 +19,158 @@
         { "name": "loudness_normalization", "parameters": { "headroom_db": 1.5 } },
         { "name": "limiter", "parameters": { "threshold_db": -1.0 } }
       ]
+    },    
+    "train_station_pa": {
+        "effects": [
+          /* 1 ----- steep band-pass 150–5500 Hz */
+          { "name": "high_pass_filter",
+            "parameters": { "cutoff_hz": 150 } },
+
+          { "name": "low_pass_filter",
+            "parameters": { "cutoff_hz": 5500 } },
+
+          /* 2 ----- mid-range resonance (+6 dB at 1.6 kHz, Q≈2) */
+          { "name": "equalizer",
+            "parameters": {
+              "bands": [
+                { "type": "peak",
+                  "cutoff_frequency_hz": 1800,
+                  "gain_db": 6,
+                  "q": 2.0 }
+              ]
+            }},
+
+          /* 3 ----- heavy bus compression */
+          { "name": "compressor",
+            "parameters": {
+              "threshold_db": -18,
+              "ratio": 8,
+              "attack_ms": 3,
+              "release_ms": 120 }},
+
+          /* 4 ----- short slap-back echo ( ms) */
+          { "name": "delay",
+            "parameters": {
+              "delay_seconds": 0.15,
+              "feedback": 0.45,
+              "mix": 0.35 }},
+
+          /* 5 ----- diffuse hall reverb */
+          { "name": "reverb",
+            "parameters": {
+              "room_size": 0.7,
+              "damping": 0.6,
+              "wet_level": 0.35,
+              "dry_level": 0.9 }},
+
+          /* 6 ----- output limiter (-1 dB ceiling) */
+          { "name": "limiter",
+            "parameters": { "threshold_db": -5 } }
+        ]
     },
-    "walkie-talkie-strong": {
-      "description": "The original, strong walkie-talkie effect.",
+    "walkie-talkie": {
       "effects": [
-        {
-          "name": "walkie_talkie",
+        { "name": "walkie_talkie", "parameters": { "gain_db": 5, "am_depth": 0.195, "static_level_db": -35, "hp": 400, "lp": 2500, "thresh": -28, "ratio": 2, "crush_bits": 4 } }
+        // { "name": "reverb", "parameters": { "room_size": 0.75, "damping": 0.5, "wet_level": 0.3, "dry_level": 0.7, "width": 1.0, "freeze_mode": false } }
+        // { "name": "silence", "parameters": { "duration_ms": 500, "position": "start" } },
+        // { "name": "silence", "parameters": { "duration_ms": 1500, "position": "end" } }
+      ]
+  },
+  "padding": {
+    "effects": [
+      { "name": "silence", "parameters": { "duration_ms": 1500, "position": "start" } },
+      { "name": "silence", "parameters": { "duration_ms": 1500, "position": "end" } }
+    ]
+  },
+  "muffled": {
+    "effects": [
+      { "name": "muffled", "parameters": { "low_pass_hz": 10, "high_pass_hz": 800, "gain_db": -1, "strength": 0.01} }
+    ]
+  },
+  "ghost": {
+    "effects": [
+      { "name": "ghost", "parameters": { "room_size": 0.45, "wet_level": 0.75, "dry_level": 0.35, "damping": 0.58,"delay_ms": 200, "feedback": 0.55, "mix": 0.25 } }
+    ]
+  },
+  "telephone": {
+    "effects": [
+      {
+          "name": "telephone",
           "parameters": {
-            "high_pass_hz": 400,
-            "low_pass_hz": 2800,
-            "compressor_ratio": 8.0,
-            "gain_db": 5
+            "hp": 450,      
+            "lp": 2500,        
+            "slope_stages": 6, 
+            "comp_thresh": -18,
+            "comp_ratio": 7,
+            "crush_bits": 5,    
+            "resonance_hz": 1000,
+            "resonance_db": 7,
+            "gain_db": 4
           }
         }
-      ]
-    },
-    "walkie-talkie-subtle": {
-      "description": "A less intense, clearer walkie-talkie effect.",
-      "effects": [
-        {
-          "name": "walkie_talkie",
+   ]
+  },
+  "recording": {
+    "effects": [
+      {
+          "name": "telephone",
           "parameters": {
-            "high_pass_hz": 5,
-            "low_pass_hz": 50,
-            "compressor_ratio": 16.0,
-            "gain_db": 16
+            "hp": 450,      
+            "lp": 2500,        
+            "slope_stages": 6, 
+            "comp_thresh": -18,
+            "comp_ratio": 7,
+            "crush_bits": 5,    
+            "resonance_hz": 1000,
+            "resonance_db": 7,
+            "gain_db": 4
           }
+      },
+      { "name": "static", "parameters": { "level_db": -50} },
+      { "name": "fade_in", "parameters": { "duration_ms": 3000 } },
+      { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
+   ]
+  },
+  "robot": {
+    "effects": [
+      { 
+        "name": "robot",
+        "parameters": {
+          "rate_hz": 0.6,
+          "depth": 0.95,
+          "centre_delay_ms": 5,
+          "mix": 1.0,
+          "pitch_semitones": -3
         }
-      ]
-    },
-    "ghostly-echo": {
-      "description": "An ethereal, spooky voice effect for spirits or dreams.",
-      "effects": [
-        { "name": "ghost" }
-      ]
-    },
-    "giant-voice": {
-      "description": "A deep, booming voice for a large character.",
-      "effects": [
-        { "name": "pitch_shift", "parameters": { "semitones": -5 } }
-      ]
-    },
-    "robot-voice": {
-      "description": "A metallic, synthetic voice for an AI or android.",
-      "effects": [
-        { "name": "robot", "parameters": { "flanger_rate_hz": 1.2, "pitch_semitones": -2 } }
-      ]
-    },
-    "muffled-through-wall": {
-      "description": "Makes audio sound like it's coming from another room.",
-      "effects": [
-        { "name": "muffled" }
-      ]
-    }
+      }
+    ]
+  },
+  "large_room": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.8, "damping": 0.5, "wet_level": 0.4, "dry_level": 0.6, "width": 1.0, "freeze_mode": false } }
+    ]
+  },
+  "small_room": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.3, "damping": 0.5, "wet_level": 0.2, "dry_level": 0.8, "width": 1.0, "freeze_mode": false } }
+    ]
+  },
+  "dramatic_echo": {
+    "effects": [
+      { "name": "reverb", "parameters": { "room_size": 0.9, "damping": 0.4, "wet_level": 0.5, "dry_level": 0.5, "width": 1.0, "freeze_mode": false } },
+      { "name": "delay", "parameters": { "delay_seconds": 0.3, "feedback": 0.6, "mix": 0.4 } }
+    ]
+  },
+  "fade-out" : {
+    "effects": [
+      { "name": "fade_out", "parameters": { "duration_ms": 3000 } }
+    ]
+  },
+
+  "fade-in" : {
+    "effects": [
+      { "name": "fade_in", "parameters": { "duration_ms": 3000 } }
+    ]
+  }
   }
 }

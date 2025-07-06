@@ -419,8 +419,8 @@ def generate_tts(text, voice_id=None, **kwargs):
             if full_audio is None:
                 full_audio = audio
             else:
-                # Add a small silence between chunks
-                silence_ms = chunk_settings.get("silence_between_chunks_ms", 100)  # Reduced from 250
+                # Add a small silence between chunks (also before the first chunk?)
+                silence_ms = chunk_settings.get("silence_between_chunks_ms", 100)
                 silence = torch.zeros(1, int(sample_rate * silence_ms / 1000))
                 full_audio = torch.cat([full_audio, silence, audio], dim=1)
 

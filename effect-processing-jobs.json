@@ -193,7 +193,6 @@
       "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root123.wav",
       "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root123.wav-effect.wav",
       "effects": [
-        { "name": "st", "parameters": { "strength": 0.9 } },
         { "name": "loudness_normalization", "parameters": { "headroom_db": 0.5 } }
       ]
     },

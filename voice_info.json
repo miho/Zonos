@@ -254,7 +254,7 @@
       "silence_between_chunks_ms": 100
     },
     "audio_prefix": {
-      "enabled": false,
+      "enabled": true,
       "default_file": "assets/silence_100ms.wav"
     },
     "zonos_defaults": {
