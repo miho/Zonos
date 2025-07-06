@@ -1,6 +1,26 @@
 
 {
   "effect_presets": {
+    "narration-master": {
+      "description": "A full mastering chain for clean, professional narration.",
+      "effects": [
+        { "name": "high_pass_filter", "parameters": { "cutoff_hz": 80 } },
+        { "name": "noise_reduction", "parameters": { "strength": 0.9 } },
+        // { "name": "de-esser", "parameters": { "threshold_db": -20, "ratio": 3 } },
+        {
+          "name": "equalizer",
+          "parameters": {
+            "bands": [
+              { "type": "peak", "frequency": 300, "gain_db": -2.5, "q": 1.5 },
+              { "type": "high_shelf", "frequency": 5000, "gain_db": 2.0, "q": 0.7 }
+            ]
+          }
+        },
+        { "name": "compressor", "parameters": { "threshold_db": -18, "ratio": 3.5 } },
+        { "name": "loudness_normalization", "parameters": { "headroom_db": 1.5 } },
+        { "name": "limiter", "parameters": { "threshold_db": -1.0 } }
+      ]
+    },    
     "train_station_pa": {
         "effects": [
           /* 1 ----- steep band-pass 150–5500 Hz */
@@ -170,12 +190,17 @@
       "pad_end_ms"  : 3200
     },
     {
-      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\someother_wav.wav",
-      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\someother_wav-effect.wav",
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root123.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root123.wav-effect.wav",
       "effects": [
-        { "name": "noise_reduction", "parameters": { "strength": 0.9 } },
+        { "name": "st", "parameters": { "strength": 0.9 } },
         { "name": "loudness_normalization", "parameters": { "headroom_db": 0.5 } }
       ]
+    },
+    {
+      "source": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root.wav",
+      "target": "C:\\AI\\Zonos-for-windows\\output_audio\\TTS.0000.story_root.wav-effect-3.wav",
+      "apply_preset": "narration-master"
     }
   ]
 }
